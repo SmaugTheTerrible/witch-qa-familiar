@@ -7,25 +7,25 @@ services:
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: wqaf
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   
-  backend:
+  api:
     build: ./backend
-    container_name: witch_qa_familiar_back
+    container_name: witch_qa_familiar_api
     environment:
-      DATABASE_URL: postgres://myuser:mypassword@db:5432/mydatabase
+      DATABASE_URL: postgres://myuser:mypassword@db:5432/wqaf
     depends_on:
       - db
-    ports:
-      - "5000:5000"
+    # ports:
+    #   - "5000:5000"
     
-  frontend:
+  client:
     build: ./frontend
-    container_name: witch_qa_familiar_front
+    container_name: witch_qa_familiar_client
     ports:
       - "80:80"
 
