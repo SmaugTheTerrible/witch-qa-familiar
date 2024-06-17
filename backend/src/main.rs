@@ -1,12 +1,16 @@
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{get, post, web, App, HttpServer, Responder};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use dotenv::dotenv;
 use log::info;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::str::FromStr;
+
+mod auth;
+mod crypto;
 
 #[get("/hello")]
 async fn hello() -> actix_web::Result<impl Responder> {
@@ -60,12 +64,15 @@ async fn main() -> std::io::Result<()> {
     info!("Starting server on {}", &port);
 
     HttpServer::new(move || {
+        let auth_middleware = HttpAuthentication::bearer(auth::validator);
+
         App::new()
             .app_data(pool.clone())
             .wrap(Cors::permissive())
             .wrap(Logger::default())
-            .service(web::scope("/api").service(factory).service(hello))
-        // .service(hello)
+            // .service(login)
+            // .service(create_user)
+            .service(web::scope("/api").wrap(auth_middleware).service(factory))
     })
     .bind(("0.0.0.0", port))?
     .run()
